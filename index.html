@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Jarvis Control Panel</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    :root {
+      --bg: #1e1e1e;
+      --accent: #0088cc;
+      --text: #ffffff;
+      --btn-bg: #2d2d2d;
+      --btn-hover: #3c3c3c;
+    }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      min-height: 100vh;
+      padding: 16px;
+      box-sizing: border-box;
+    }
+    h1 {
+      margin-top: 0;
+      font-size: 1.3rem;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 12px;
+      width: 100%;
+      max-width: 400px;
+    }
+    button {
+      padding: 14px 8px;
+      border: none;
+      border-radius: 6px;
+      background: var(--btn-bg);
+      color: var(--text);
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    button:hover {
+      background: var(--btn-hover);
+    }
+    button.danger {
+      background: #8b0000;
+    }
+    input[type="text"] {
+      width: 100%;
+      padding: 12px 8px;
+      border-radius: 6px;
+      border: 1px solid var(--btn-hover);
+      background: var(--btn-bg);
+      color: var(--text);
+      margin-top: 16px;
+      box-sizing: border-box;
+    }
+  </style>
+</head>
+<body>
+  <h1>Jarvis – панель управления</h1>
+  <div class="grid">
+    <button id="btnShot">📸 Скриншот</button>
+    <button id="btnProc">📝 Процессы</button>
+    <button id="btnReboot" class="danger">🔄 Перезагрузка</button>
+    <button id="btnShutdown" class="danger">⏻ Выключение</button>
+    <button id="btnChrome">🌐 Chrome</button>
+    <button id="btnExplorer">📂 Проводник</button>
+  </div>
+
+  <input type="text" id="customCmd" placeholder="Введите команду и нажмите Enter" />
+
+  <script>
+    const tg = window.Telegram.WebApp;
+    tg.expand();
+    tg.ready();
+
+    function send(action, payload = {}) {
+      const data = { action, payload };
+      tg.sendData(JSON.stringify(data));
+    }
+
+    // --- кнопки ---
+    document.getElementById("btnShot").onclick = () => send("screenshot");
+    document.getElementById("btnProc").onclick = () => send("process_list");
+    document.getElementById("btnReboot").onclick = () => {
+      if (confirm("Перезагрузить ПК?")) send("reboot");
+    };
+    document.getElementById("btnShutdown").onclick = () => {
+      if (confirm("Выключить ПК?")) send("shutdown");
+    };
+    document.getElementById("btnChrome").onclick = () => send("cmd", { cmd: "start chrome" });
+    document.getElementById("btnExplorer").onclick = () => send("cmd", { cmd: "start explorer" });
+
+    // --- кастомная команда ---
+    const input = document.getElementById("customCmd");
+    input.addEventListener("keydown", e => {
+      if (e.key === "Enter" && input.value.trim()) {
+        send("cmd", { cmd: input.value.trim() });
+        input.value = "";
+      }
+    });
+  </script>
+</body>
+</html> 
